@@ -1,7 +1,7 @@
 /**
  * 
- * @param {*} intervals 
- * @param {*} mergeDistance 
+ * @param {array} intervals 
+ * @param {number} mergeDistance 
  */
 function mergeInterval(intervals, mergeDistance){
     // If the intervals length is less than 2, no need to proceed we just convert it and return
@@ -30,14 +30,30 @@ function mergeInterval(intervals, mergeDistance){
         }
     }
 
-    return merge(convertToArray(filteredIntervals), mergeDistance);
+    let output = merge(convertToArray(filteredIntervals), mergeDistance);
+
+    const deletedIntervals = intervals.filter(interval => interval.action === "DELETED")
+
+    // This will run if there are intervals to be deleted
+    for(let i = 0; i < deletedIntervals.length; i++){
+        if(
+            output[i] &&
+            output[i][0] < deletedIntervals[i].start &&
+            output[i][1] > deletedIntervals[i].end
+        ){
+            output.splice(i, 1, [output[i][0], deletedIntervals[i].start], [deletedIntervals[i].end, output[i][1]])
+        }
+        
+    }
+
+    return output
   }
 
   /**
    * Merges sorted intervals taking into account the merge distance
    * 
-   * @param {*} intervals 
-   * @param {*} mergeDistance 
+   * @param {array} intervals 
+   * @param {number} mergeDistance 
    */
   function merge(intervals, mergeDistance){
     let previous = intervals[0];
@@ -61,7 +77,7 @@ function mergeInterval(intervals, mergeDistance){
 
   /**
    * Converts intervals array of objects to array of array of the start and end time of each interval
-   * @param {*} intervals 
+   * @param {array} intervals 
    */
   function convertToArray(intervals){
       return intervals.map(interval => {
